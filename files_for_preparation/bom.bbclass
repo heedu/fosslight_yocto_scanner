@@ -102,14 +102,31 @@ python do_dumptasks() {
 }
 
 
-do_archive_patched() {
- # Create the sources directory in WORKDIR if it doesn't exist
-    mkdir -p ${WORKDIR}/sources
+python do_archive() {
+    import os
+    import subprocess
 
-    # Create the tar.gz file with the name based on the PF variable
-    tar -czf ${WORKDIR}/sources/${PF}.tar.gz -C ${S} .
+    topdir = d.getVar('TOPDIR')
+    s = d.getVar('S')
+    pf = d.getVar('PF')
+
+    sources_dir = os.path.join(topdir, 'sources')
+    if not os.path.exists(sources_dir):
+        os.makedirs(sources_dir)
+
+    output_filename = os.path.join(sources_dir, "{}.tar.gz".format(pf))
+    script_path = os.path.join(d.getVar('WORKDIR'), 'archive_source.py')
+
+    # Determine the Python interpreter to use
+    python_interpreter = d.getVar('PYTHON')
+    if not python_interpreter:
+        python_interpreter = 'python'  # Default to 'python' which should work for both Python 2 and 3
+
+    # Run the Python script to create the archive
+    subprocess.check_call([python_interpreter, script_path, s, output_filename])
 }
+
 
 # do_dumptasks 
 addtask do_dumptasks after do_configure before do_compile
-addtask do_archive_patched after do_patch before do_configure
+addtask do_archive after do_configure before do_compile

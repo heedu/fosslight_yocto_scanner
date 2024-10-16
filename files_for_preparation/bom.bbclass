@@ -72,8 +72,9 @@ python do_dumptasks() {
     import os
     import bb
 
-    ar_outdir = os.path.join(d.getVar('TOPDIR', True), "dumped_tasks")  # 기본값 설정
-    ar_dumptasks = ["do_configure", "do_compile"]  # 기본값 설정
+    # dump_tasks folder gathers all dumped tasks
+    ar_outdir = os.path.join(d.getVar('TOPDIR', True), "dumped_tasks")  
+    ar_dumptasks = ["do_configure", "do_compile"] 
     pf = d.getVar('PF', True)
 
     bb.utils.mkdirhier(ar_outdir)
@@ -100,5 +101,5 @@ python do_dumptasks() {
             bb.fatal('%s: Cannot export %s: %s' % (pf, task, e))
 }
 
-# do_dumptasks 작업을 빌드 순서에 포함시키기
+# do_dumptasks 
 addtask do_dumptasks after do_configure before do_compile

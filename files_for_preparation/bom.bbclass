@@ -101,5 +101,15 @@ python do_dumptasks() {
             bb.fatal('%s: Cannot export %s: %s' % (pf, task, e))
 }
 
+
+do_archive_patched() {
+ # Create the sources directory in WORKDIR if it doesn't exist
+    mkdir -p ${WORKDIR}/sources
+
+    # Create the tar.gz file with the name based on the PF variable
+    tar -czf ${WORKDIR}/sources/${PF}.tar.gz -C ${S} .
+}
+
 # do_dumptasks 
 addtask do_dumptasks after do_configure before do_compile
+addtask do_archive_patched after do_patch before do_configure

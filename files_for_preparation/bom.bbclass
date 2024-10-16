@@ -106,6 +106,11 @@ python do_archive() {
     import os
     import subprocess
 
+    pn = d.getVar('PN')
+    if '-native' in pn:
+        bb.plain("Skipping archive for native recipe: {}".format(pn))
+        return
+
     topdir = d.getVar('TOPDIR')
     s = d.getVar('S')
     pf = d.getVar('PF')
@@ -122,8 +127,22 @@ python do_archive() {
     if not python_interpreter:
         python_interpreter = 'python'  # Default to 'python' which should work for both Python 2 and 3
 
+    # Print debugging information
+    bb.plain("Running archive script with the following parameters:")
+    bb.plain("Python interpreter: {}".format(python_interpreter))
+    bb.plain("Script path: {}".format(script_path))
+    bb.plain("Source directory: {}".format(s))
+    bb.plain("Output filename: {}".format(output_filename))
+
     # Run the Python script to create the archive
-    subprocess.check_call([python_interpreter, script_path, s, output_filename])
+    try:
+        subprocess.run([python_interpreter, script_path, s, output_filename], check=True)
+    except subprocess.CalledProcessError as e:
+        bb.error("Failed to run archive script: {}".format(e))
+        bb.error("Output: {}".format(e.output))
+        bb.error("Return code: {}".format(e.returncode))
+        raise
+
 }
 
 

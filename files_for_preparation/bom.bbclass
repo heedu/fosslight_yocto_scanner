@@ -72,9 +72,8 @@ python do_dumptasks() {
     import os
     import bb
 
-    # dump_tasks folder gathers all dumped tasks
-    ar_outdir = os.path.join(d.getVar('TOPDIR', True), "dumped_tasks")  
-    ar_dumptasks = ["do_configure", "do_compile"] 
+    ar_outdir = os.path.join(d.getVar('TOPDIR', True), "dumped_tasks")  # 기본값 설정
+    ar_dumptasks = ["do_configure", "do_compile"]  # 기본값 설정
     pf = d.getVar('PF', True)
 
     bb.utils.mkdirhier(ar_outdir)
@@ -101,6 +100,37 @@ python do_dumptasks() {
             bb.fatal('%s: Cannot export %s: %s' % (pf, task, e))
 }
 
-
-# do_dumptasks 
+# do_dumptasks 작업을 빌드 순서에 포함시키기
 addtask do_dumptasks after do_configure before do_compile
+
+python do_copy_and_compress_source() {
+    import os
+    import shutil
+    import tarfile
+
+    dest_dir = os.path.join(d.getVar('TOPDIR'), 'download_src')
+
+    if not os.path.exists(dest_dir):
+        os.makedirs(dest_dir)
+
+    src_dir = d.getVar('S')
+    pr = d.getVar('PR')
+
+    for item in os.listdir(src_dir):
+        s = os.path.join(src_dir, item)
+        d = os.path.join(dest_dir, item)
+        if os.path.isdir(s):
+            shutil.copytree(s, d, symlinks=False, ignore=None)
+        else:
+            shutil.copy2(s, d)
+
+    tar_path = os.path.join(dest_dir, f'source-{pr}.tar.gz')
+
+    with tarfile.open(tar_path, 'w:gz') as tar:
+        tar.add(dest_dir, arcname=os.path.basename(dest_dir))
+
+    bb.plain("do_copy_and_compress_source: Source copied and compressed to {}".format(tar_path))
+}
+
+addtask copy_and_compress_source after do_fetch before do_unpack
+

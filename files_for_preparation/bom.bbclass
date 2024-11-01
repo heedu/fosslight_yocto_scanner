@@ -132,5 +132,5 @@ python do_copy_and_compress_source() {
     bb.plain("do_copy_and_compress_source: Source copied and compressed to {}".format(tar_path))
 }
 
-addtask copy_and_compress_source after do_fetch before do_unpack
+addtask copy_and_compress_source before do_configure after do_unpack
 

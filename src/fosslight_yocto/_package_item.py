@@ -44,6 +44,7 @@ class PackageItem(FileItem):
         self.pr = ""
         self.source_done = ""
         self.full_src_uri = ""
+        self.pf = ""
         self._yocto_recipe = []
         self._yocto_package = []
 
@@ -299,6 +300,8 @@ def set_value_switch(oss, key, value, nested_pkg_name):
         oss.source_done = value
     elif key == 'full_src_uri':
         oss.full_src_uri = value
+    elif key == 'package_format':
+        oss.pf = value
 
 
 def update_package_name(oss, value, nested_pkg_name):
